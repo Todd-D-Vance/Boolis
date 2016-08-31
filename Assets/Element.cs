@@ -1,14 +1,15 @@
 ﻿using UnityEngine;
 using System.Collections;
 using Assets;
+using UnityEngine.Assertions;
 
 public class Element : MonoBehaviour
 {
- 
+
     private float gameTime = 0f;
     private float screenX, screenY, screenRot;
 
-    private float width;//TODO scale the sprite itself
+    private float width;
     private float height;
 
 
@@ -29,6 +30,30 @@ public class Element : MonoBehaviour
     public float moveSpeed = 2.5f;
     public float fallSpeed = 2f;
     public float rotateSpeed = 2.5f;
+
+
+
+
+    public void SetSprite()
+    {
+
+        Sprite[] sprites = sprites_NoValue;
+        int index = nameToIndex(elementType.name);       
+        Sprite sprite = sprites[index];
+        transform.GetChild(0).GetComponent<SpriteRenderer>().sprite = sprite;
+        transform.GetChild(0).localScale = new Vector3(width, height);
+
+
+        //TODO set sprite according to name and terminal values of elementType
+
+
+        //TODO scale the sprite according to width and height
+    }
+
+    private void UpdateValues()
+    {
+        //TODO update values of all elements
+    }
 
 
 
@@ -169,7 +194,7 @@ public class Element : MonoBehaviour
     {
         get
         {
-            return X * width + PlaySpace.instance.LeftX + width/2 - ScreenX;
+            return X * width + PlaySpace.instance.LeftX + width / 2 - ScreenX;
         }
     }
 
@@ -177,7 +202,7 @@ public class Element : MonoBehaviour
     {
         get
         {
-            return Y * height + PlaySpace.instance.BottomY + height/2 - ScreenY;
+            return Y * height + PlaySpace.instance.BottomY + height / 2 - ScreenY;
         }
     }
 
@@ -212,7 +237,7 @@ public class Element : MonoBehaviour
                 elementType.Deregister(this);
             }
             elementType = value;
-            SetSprite(elementType);
+            SetSprite();
             elementType.Register(this);
         }
     }
@@ -220,14 +245,19 @@ public class Element : MonoBehaviour
 
     #endregion properties
 
-    public void SetSprite(ElementType elementType)
-    {
-        //TODO set sprite according to name and terminal values of elementType
-    }
+    private Sprite[] sprites_NoValue;
+    private Sprite[] sprites_True;
+    private Sprite[] sprites_False;
+    private Sprite[] sprites_Poison;
 
 
     void Start()
     {
+        sprites_NoValue = Resources.LoadAll<Sprite>("game-pieces");
+        sprites_True = Resources.LoadAll<Sprite>("game-pieces");
+        sprites_False = Resources.LoadAll<Sprite>("game-pieces");
+        sprites_Poison = Resources.LoadAll<Sprite>("game-pieces");
+
         SetupUnits();
         Init();
         Fall();
@@ -253,14 +283,14 @@ public class Element : MonoBehaviour
             }
         }
 
-        if(tick && !falling)
+        if (tick && !falling)
         {
             if (disable)
             {
                 canMove = false;
                 canRotate = false;
                 canFall = false;
-            }  
+            }
             else
             {
                 disableNextTick();
@@ -292,17 +322,14 @@ public class Element : MonoBehaviour
         UpdateValues();
     }
 
-    private void UpdateValues()
-    {
-        //TODO update values of all elements
-    }
 
     void CheckKeyboard()
     {
         if (Input.GetKey(KeyCode.LeftArrow))
         {
             MoveLeft();
-        }else 
+        }
+        else
         {
             StopMoveLeft();
         }
@@ -310,7 +337,7 @@ public class Element : MonoBehaviour
         {
             MoveRight();
         }
-        else 
+        else
         {
             StopMoveRight();
         }
@@ -417,7 +444,7 @@ public class Element : MonoBehaviour
         height = PlaySpace.instance.computeElementHeight();
 
         MaxX = (int)((PlaySpace.instance.RightX - PlaySpace.instance.LeftX) / width - .01);
-        MaxY = (int)((PlaySpace.instance.TopY - PlaySpace.instance.BottomY) /height - .01);
+        MaxY = (int)((PlaySpace.instance.TopY - PlaySpace.instance.BottomY) / height - .01);
         Debug.Log("Sprite dims: " + width + " x " + height);
     }
 
@@ -430,9 +457,20 @@ public class Element : MonoBehaviour
     private void Init()
     {
         Y = MaxY;
-        X = Random.Range(0, MaxX);
-        Rot = 0;
-        syncGameToScreen();
+        X = Random.Range(0, MaxX+1);
+        //TODO why doesn't this work?
+        if (PlaySpace.instance.locationFilled(X, Y))
+        {
+            PlaySpace.instance.lose();
+            Destroy(gameObject);
+        }
+        else
+        {
+            Rot = 0;
+            syncGameToScreen();
+            ElementType = new ElementType(indexToName(Random.Range(0, 9)));
+        }
+       
     }
 
     public void Fall()
@@ -523,4 +561,70 @@ public class Element : MonoBehaviour
 
     }
 
+    private int nameToIndex(string name)
+    {
+        int index;
+        switch (name)
+        {
+            case "straight":
+                index = 0;
+                break;
+            case "bend":
+                index = 1;
+                break;
+            case "and":
+                index = 2;
+                break;
+            case "not":
+                index = 3;
+                break;
+            case "or":
+                index = 4;
+                break;
+            case "notbend":
+                index = 5;
+                break;
+            case "constant":
+                index = 6;
+                break;
+            case "cut":
+                index = 7;
+                break;
+            case "poison":
+                index = 8;
+                break;
+            default:
+                throw new AssertionException("Case \"" + name + "\" not handled", "Case \"" + name + "\" not handled");
+        }
+        return index;
+    }
+
+
+    private string indexToName(int index)
+    {
+        switch (index)
+        {
+            case 0:
+                return "straight";
+            case 1:
+                return "bend";
+            case 2:
+                return "and";
+            case 3:
+                return "not";
+            case 4:
+                return "or";
+            case 5:
+                return "notbend";
+            case 6:
+                return "constant";
+            case 7:
+                return "cut";
+            case 8:
+                return "poison";
+            default:
+                throw new AssertionException("Case \"" + index + "\" not handled", "Case \"" + index + "\" not handled");
+        }
+
+    }
 }

@@ -111,7 +111,7 @@ namespace Assets
         {
             foreach(Element e in elements)
             {
-                e.SetSprite(this);
+                e.SetSprite();
             }
         }
 
@@ -278,6 +278,10 @@ namespace Assets
                     top = bottom = SuperBool.False;
                     left = right = SuperBool.True;
                     break;
+
+                case "cut":
+                    top = bottom = left = right = SuperBool.NoValue;
+                    break;                
 
                 case "poison":
                     top = bottom = left = right = SuperBool.Poison;

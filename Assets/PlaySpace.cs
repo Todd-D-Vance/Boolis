@@ -93,6 +93,11 @@ public class PlaySpace : MonoBehaviour
         return Instantiate(elementPrefab) as GameObject;
     }
 
+    public void lose()
+    {
+        Debug.Log("Game Over!");
+    }
+
     public void UpdateLocation(Element element, int oldX, int oldY)
     {
         gameboard[oldX, oldY] = null;
