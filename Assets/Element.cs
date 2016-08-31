@@ -1,17 +1,18 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Assets;
 
 public class Element : MonoBehaviour
 {
-  
-
-
+ 
     private float gameTime = 0f;
     private float screenX, screenY, screenRot;
 
     private float width;//TODO scale the sprite itself
     private float height;
 
+
+    private ElementType elementType;
 
     private bool falling = false;
     private bool rotatingLeft = false;
@@ -28,6 +29,7 @@ public class Element : MonoBehaviour
     public float moveSpeed = 2.5f;
     public float fallSpeed = 2f;
     public float rotateSpeed = 2.5f;
+
 
 
 
@@ -196,8 +198,32 @@ public class Element : MonoBehaviour
         }
     }
 
+    public ElementType ElementType
+    {
+        get
+        {
+            return elementType;
+        }
+
+        set
+        {
+            if (elementType != null)
+            {
+                elementType.Deregister(this);
+            }
+            elementType = value;
+            SetSprite(elementType);
+            elementType.Register(this);
+        }
+    }
+
 
     #endregion properties
+
+    public void SetSprite(ElementType elementType)
+    {
+        //TODO set sprite according to name and terminal values of elementType
+    }
 
 
     void Start()
@@ -263,9 +289,15 @@ public class Element : MonoBehaviour
         movingRight = false;
         receivingInput = false;
         PlaySpace.instance.SpawnNewElement();
+        UpdateValues();
     }
 
-    private void CheckKeyboard()
+    private void UpdateValues()
+    {
+        //TODO update values of all elements
+    }
+
+    void CheckKeyboard()
     {
         if (Input.GetKey(KeyCode.LeftArrow))
         {
