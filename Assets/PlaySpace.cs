@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Assets;
+
 
 public class PlaySpace : MonoBehaviour
 {
@@ -72,6 +74,7 @@ public class PlaySpace : MonoBehaviour
 
     void Awake()
     {
+        //Value.test();
         instance = this;
     }
     // Use this for initialization
